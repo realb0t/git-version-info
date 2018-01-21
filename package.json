@@ -1,0 +1,20 @@
+{
+  "name": "git-version-info",
+  "version": "0.1.0",
+  "description": "GitVersion Info tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "git",
+    "npm",
+    "semver",
+    "git-version"
+  ],
+  "author": "Kazantsev Nickolay",
+  "license": "MIT",
+  "dependencies": {
+    "nodegit": "^0.20.3"
+  }
+}
