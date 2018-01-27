@@ -8,10 +8,20 @@ const git = require("nodegit");
 const packageJsonPath = path.join(workDir, 'package.json');
 const fs = require('fs');
 
+let packageJson = null;
+function getPackageJson()
+{
+  if (!packageJson)
+  {
+    packageJson = require(packageJsonPath);
+  }
+
+  return packageJson;
+}
+
 function getPackageVersion(workDir)
 {
-  const packageJson = require(packageJsonPath);
-  return packageJson.version;
+  return getPackageJson().version;
 }
 
 // Вычисляет последний схожий коммит между ветками develop и release/*
@@ -140,7 +150,12 @@ function formatVersion(version)
 
 function outputVersionTeamcity(version)
 {
+  const packageJson = getPackageJson();
+  const { name: packageName, version: packageVersion } = packageJson;
   console.log(`##teamcity[buildNumber '${formatVersion(version)}']`);
+  console.log(`##teamcity[setParameter name='package.Name' value='${packageName}']`);
+  console.log(`##teamcity[setParameter name='package.Version' value='${packageVersion}']`);
+  console.log(`##teamcity[setParameter name='package.Prerelease' value='${version.prerelease}']`);
 }
 
 function outputVersionJson(version)
@@ -168,7 +183,7 @@ function writeVersion(version)
   return new Promise((resolve, reject) => {
     try
     {
-      const prevPackage = require(packageJsonPath);
+      const prevPackage = getPackageJson();
       prevPackage.version = formatVersion(version);
       const nextPackage = JSON.stringify(prevPackage, null, 2);
       fs.writeFile(packageJsonPath, nextPackage, 'utf8', resolve);
@@ -239,7 +254,7 @@ program
   git.Repository.open(workDir)
     .then(function(repo)
     {
-      const currentVersion = getPackageVersion(workDir);
+      const currentVersion = getPackageVersion();
       getPrefixByBranch(repo, currentVersion)
         .catch((error) => { console.log(error) });
     })
