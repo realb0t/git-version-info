@@ -130,7 +130,28 @@ function getVersionByBranchName(branchName)
 
 function outputVersionTeamcity(version)
 {
-  console.log(`##teamcity[buildNumber '${version}']`)
+  const outputVersion = `${version.version}-${version.prerelease}`;
+  console.log(`##teamcity[buildNumber '${outputVersion}']`);
+}
+
+function outputVersionJson(version)
+{
+  console.log(JSON.stringify(version));
+}
+
+function outputVersion(version)
+{
+  switch (true)
+  {
+    case program.json:
+      outputVersionJson(version);
+      break;
+    case program.teamcity:
+      outputVersionTeamcity(version);
+      break;
+    default:
+      console.log(version)
+  }
 }
 
 function getPrefixByBranch(repo, currentVersion)
@@ -164,7 +185,11 @@ function getPrefixByBranch(repo, currentVersion)
             const shortSha = tagHash.slice(0, 7);
             getCommitsCount(repo, ref, tagHash).then((count) =>
             {
-              outputVersionTeamcity(`${currentVersion}-feature-${shortSha}.${count}`);
+              const version = {
+                version: currentVersion,
+                prerelease: `feature-${shortSha}.${count}`
+              };
+              outputVersion(version);
             })
             .catch(e => console.log(e));
           });
@@ -178,6 +203,8 @@ function getPrefixByBranch(repo, currentVersion)
 program
   .version(package.version)
   .option('-j, --json', 'output as JSON')
+  .option('-t, --teamcity', 'output for TeamCity as service message')
+  .option('-w, --write', 'write version into package.json')
   .parse(process.argv);
   const workDir = process.cwd();
   const git = require("nodegit");
