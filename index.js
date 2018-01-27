@@ -1,11 +1,16 @@
 #!/usr/bin/env node
 
 const package = require('./package.json');
+const path = require('path');
 const program = require('commander');
+const workDir = process.cwd();
+const git = require("nodegit");
+const packageJsonPath = path.join(workDir, 'package.json');
+const fs = require('fs');
 
 function getPackageVersion(workDir)
 {
-  const packageJson = require(workDir + '/package.json');
+  const packageJson = require(packageJsonPath);
   return packageJson.version;
 }
 
@@ -128,10 +133,14 @@ function getVersionByBranchName(branchName)
   return version;
 }
 
+function formatVersion(version)
+{
+  return `${version.version}-${version.prerelease}`;
+}
+
 function outputVersionTeamcity(version)
 {
-  const outputVersion = `${version.version}-${version.prerelease}`;
-  console.log(`##teamcity[buildNumber '${outputVersion}']`);
+  console.log(`##teamcity[buildNumber '${formatVersion(version)}']`);
 }
 
 function outputVersionJson(version)
@@ -152,6 +161,20 @@ function outputVersion(version)
     default:
       console.log(version)
   }
+}
+
+function writeVersion(version)
+{
+  return new Promise((resolve, reject) => {
+    try
+    {
+      const prevPackage = require(packageJsonPath);
+      prevPackage.version = formatVersion(version);
+      const nextPackage = JSON.stringify(prevPackage, null, 2);
+      fs.writeFile(packageJsonPath, nextPackage, 'utf8', resolve);
+    } catch(e) { reject(e); }
+  })
+
 }
 
 function getPrefixByBranch(repo, currentVersion)
@@ -189,7 +212,13 @@ function getPrefixByBranch(repo, currentVersion)
                 version: currentVersion,
                 prerelease: `feature-${shortSha}.${count}`
               };
+
               outputVersion(version);
+
+              if (program.write)
+              {
+                writeVersion(version);
+              }
             })
             .catch(e => console.log(e));
           });
@@ -206,8 +235,7 @@ program
   .option('-t, --teamcity', 'output for TeamCity as service message')
   .option('-w, --write', 'write version into package.json')
   .parse(process.argv);
-  const workDir = process.cwd();
-  const git = require("nodegit");
+
   git.Repository.open(workDir)
     .then(function(repo)
     {
