@@ -9,6 +9,63 @@ function getPackageVersion(workDir)
   return packageJson.version;
 }
 
+// Вычисляет последний схожий коммит между ветками develop и release/*
+// и возвращает количество коммитов в release/* после него
+function getCountReleaseCommits(repo, developRef, releaseRef)
+{
+
+}
+
+// Вычисляет последний схожий коммит между ветками master и hotfix/*
+// возвращает количество коммитов в hotfix/* после него
+function getCountHotfixCommits(repo, masterRef, hotfixRef)
+{
+
+}
+
+// Вычисляет последний общий коммит между ветками develop и master
+// и возвращает количество коммитов в develop после него
+function getCountDevelopVersionCommits(repo, developRef)
+{
+
+}
+
+function getCommitsCount(repo, ref, targetCommitSha)
+{
+  return new Promise((completeResolve, completeReject) =>
+  {
+    repo.getReferenceCommit(ref)
+      .catch(completeReject)
+      .then(refCommit =>
+      {
+        const history = refCommit.history();
+        let count = 0;
+
+        history.on('commit', (commit) =>
+        {
+          if (commit.sha() === targetCommitSha)
+          {
+            completeResolve(count);
+          }
+          count += 1;
+        });
+        history.on('end', function() {
+          if (count !== 0)
+          {
+            completeReject(new Error(`Not found commit ${targetCommitSha}`));
+          }
+        });
+
+        history.start();
+      });
+  });
+}
+
+
+// Возвращает коммит с которого начаналась ветка release
+// Возвращает коммит с которого начаналась ветка hotfix
+// Возвращает коммит с которого начаналась feature branch
+// TODO: зарефакторить на общее решение
 function getFeatureCommit(repo, featureRef)
 {
   return new Promise((completeResolve, completeReject) =>
@@ -57,7 +114,7 @@ function getFeatureCommit(repo, featureRef)
                     return shortHistory.indexOf(longSha) !== -1
                   });
 
-                completeResolve(firstJointSha.slice(0, 7));
+                completeResolve(firstJointSha);
               });
           });
       });
@@ -71,6 +128,11 @@ function getVersionByBranchName(branchName)
   return version;
 }
 
+function outputVersionTeamcity(version)
+{
+  console.log(`##teamcity[buildNumber '${version}']`)
+}
+
 function getPrefixByBranch(repo, currentVersion)
 {
 
@@ -79,28 +141,32 @@ function getPrefixByBranch(repo, currentVersion)
       const branchName = ref.name();
       const normalizeName = branchName.replace('refs/heads/', '');
       let branchVersion = currentVersion;
-      console.log(`Branch name "${normalizeName}"`)
 
       switch (true)
       {
         case (normalizeName === 'master'):
-          console.log(currentVersion);
+          outputVersionTeamcity(currentVersion);
           break;
         case (normalizeName === 'develop'):
-          console.log(currentVersion + '-alpha.q');
+          outputVersionTeamcity(currentVersion + '-alpha.q');
           break;
         case ((/^release\/.*$/).test(normalizeName)):
           branchVersion = getVersionByBranchName(normalizeName);
-          console.log(branchVersion + '-rc.1');
+          outputVersionTeamcity(branchVersion + '-rc.1');
           break;
         case ((/^hotfix\/.*$/).test(normalizeName)):
           branchVersion = getVersionByBranchName(normalizeName);
-          console.log(branchVersion + '-beta.1');
+          outputVersionTeamcity(branchVersion + '-beta.1');
           break;
         case ((/^feature\/.*$/).test(normalizeName)):
           getFeatureCommit(repo, ref).then(tagHash =>
           {
-            console.log(currentVersion + '-feature-' + tagHash + '.1');
+            const shortSha = tagHash.slice(0, 7);
+            getCommitsCount(repo, ref, tagHash).then((count) =>
+            {
+              outputVersionTeamcity(`${currentVersion}-feature-${shortSha}.${count}`);
+            })
+            .catch(e => console.log(e));
           });
           break;
         default:
