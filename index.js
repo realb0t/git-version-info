@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-const package = require('./package.json');
 const path = require('path');
 const program = require('commander');
-const workDir = process.cwd();
 const git = require("nodegit");
-const packageJsonPath = path.join(workDir, 'package.json');
 const fs = require('fs');
+
+const workDir = process.cwd();
+const packageJsonPath = path.join(workDir, 'package.json');
 
 let packageJson = null;
 function getPackageJson()
@@ -245,7 +245,7 @@ function getPrefixByBranch(repo, currentVersion)
 }
 
 program
-  .version(package.version)
+  .version(getPackageJson().version)
   .option('-j, --json', 'output as JSON')
   .option('-t, --teamcity', 'output for TeamCity as service message')
   .option('-w, --write', 'write version into package.json')
