@@ -5,26 +5,11 @@ const program = require('commander');
 const git = require('nodegit');
 const fs = require('fs');
 
-const PackageVersion = require('./lib/package-version')
+const PackageVersion = require('./lib/package-version');
+const OutputInfo = require('./lib/output-info');
+const PackageInfo = require('./lib/package-info');
 
 const workDir = process.cwd();
-const packageJsonPath = path.join(workDir, 'package.json');
-
-let packageJson = null;
-function getPackageJson()
-{
-  if (!packageJson)
-  {
-    packageJson = require(packageJsonPath);
-  }
-
-  return packageJson;
-}
-
-function getPackageVersion(workDir)
-{
-  return getPackageJson().version;
-}
 
 // Вычисляет последний схожий коммит между ветками develop и release/*
 // и возвращает количество коммитов в release/* после него
@@ -145,52 +130,19 @@ function getVersionByBranchName(branchName)
   return new PackageVersion(version);
 }
 
-function outputVersionTeamcity(version)
+function processVersionInfo(program, packageVersion, packageInfo)
 {
-  const packageName = getPackageJson().name;
-  console.log(`##teamcity[buildNumber '${version.toString()}']`);
-  console.log(`##teamcity[setParameter name='package.Name' value='${packageName}']`);
-  console.log(`##teamcity[setParameter name='package.Version' value='${version.version}']`);
-  console.log(`##teamcity[setParameter name='package.Prerelease' value='${version.prerelease}']`);
-}
+  const outputInfo = new OutputInfo(program);
+  outputInfo.print(packageVersion, packageInfo);
 
-function outputVersionJSON(version)
-{
-  console.log(version.toJSON());
-}
-
-function outputVersion(version)
-{
-  switch (true)
+  if (program.write)
   {
-    case program.json:
-      outputVersionJSON(version);
-      break;
-    case program.teamcity:
-      outputVersionTeamcity(version);
-      break;
-    default:
-      console.log(version.toString())
+    packageInfo.writeVersion(packageVersion);
   }
 }
 
-function writeVersion(version)
+function produceVersionInfo(repo, currentVersion, packageInfo)
 {
-  return new Promise((resolve, reject) => {
-    try
-    {
-      const prevPackage = getPackageJson();
-      prevPackage.version = version.toString();
-      const nextPackage = JSON.stringify(prevPackage, null, 2);
-      fs.writeFile(packageJsonPath, nextPackage, 'utf8', resolve);
-    } catch(e) { reject(e); }
-  })
-
-}
-
-function getPrefixByBranch(repo, currentVersion)
-{
-
   return repo.getCurrentBranch().then(ref =>
     {
       const branchName = ref.name();
@@ -200,21 +152,21 @@ function getPrefixByBranch(repo, currentVersion)
       switch (true)
       {
         case (normalizeName === 'master'):
-          outputVersionTeamcity(currentVersion);
+          processVersionInfo(program, branchVersion);
           break;
         case (normalizeName === 'develop'):
-          currentVersion.prerelease = 'alpha.1';
-          outputVersionTeamcity(currentVersion);
+          branchVersion.prerelease = 'alpha.1';
+          processVersionInfo(program, branchVersion, packageInfo);
           break;
         case ((/^release\/.*$/).test(normalizeName)):
           branchVersion = getVersionByBranchName(normalizeName);
           branchVersion.prerelease = 'alpha.1';
-          outputVersionTeamcity(branchVersion);
+          processVersionInfo(program, branchVersion, packageInfo);
           break;
         case ((/^hotfix\/.*$/).test(normalizeName)):
           branchVersion = getVersionByBranchName(normalizeName);
           branchVersion.prerelease = 'beta.1';
-          outputVersionTeamcity(branchVersion);
+          processVersionInfo(program, branchVersion, packageInfo);
           break;
         case ((/^feature\/.*$/).test(normalizeName)):
           getFeatureCommit(repo, ref).then(tagHash =>
@@ -222,14 +174,8 @@ function getPrefixByBranch(repo, currentVersion)
             const shortSha = tagHash.slice(0, 7);
             getCommitsCount(repo, ref, tagHash).then((count) =>
             {
-              currentVersion.prerelease = `feature-${shortSha}.${count}`;
-
-              outputVersion(currentVersion);
-
-              if (program.write)
-              {
-                writeVersion(currentVersion);
-              }
+              branchVersion.prerelease = `feature-${shortSha}.${count}`;
+              processVersionInfo(program, branchVersion, packageInfo);
             })
             .catch(e => console.log(e));
           });
@@ -240,18 +186,35 @@ function getPrefixByBranch(repo, currentVersion)
     });
 }
 
+const version = require(path.join(__dirname, '/package.json')).version;
+
 program
-  .version(getPackageJson().version)
+  .version(version)
   .option('-j, --json', 'output as JSON')
   .option('-t, --teamcity', 'output for TeamCity as service message')
   .option('-w, --write', 'write version into package.json')
   .parse(process.argv);
 
-  git.Repository.open(workDir)
-    .then(function(repo)
+  PackageInfo.produce(workDir)
+    .then((packageInfo) =>
     {
-      const currentVersion = new PackageVersion(getPackageVersion());
-      getPrefixByBranch(repo, currentVersion)
-        .catch((error) => { console.log(error) });
+      git.Repository.open(workDir)
+        .then(function(repo)
+        {
+          const currentVersion = new PackageVersion(packageInfo.getVersion());
+          produceVersionInfo(repo, currentVersion, packageInfo)
+            .catch((error) => { console.log(error) });
+        })
+
     })
-    .catch(error => console.log('Error', error));
+    .catch(error => console.log('Error', error));;
+
+
+////
+/*
+const gitRepository = yield git.Repository.open(workDir);
+const branchInfo = yield BranchInfo.product(repo);
+// { branchVersion, commits }
+const packageInfo = yield PackageInfo.produce(workDir);
+GitVersion.process(program, branchInfo, packageInfo);
+*/
