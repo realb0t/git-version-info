@@ -2,8 +2,10 @@
 
 const path = require('path');
 const program = require('commander');
-const git = require("nodegit");
+const git = require('nodegit');
 const fs = require('fs');
+
+const PackageVersion = require('./lib/package-version')
 
 const workDir = process.cwd();
 const packageJsonPath = path.join(workDir, 'package.json');
@@ -140,27 +142,21 @@ function getVersionByBranchName(branchName)
 {
   const regexp = /^release\/v*(\d+\.\d+\.\d+)$/;
   const version = branchName.replace(regexp, '$1');
-  return version;
-}
-
-function formatVersion(version)
-{
-  return `${version.version}-${version.prerelease}`;
+  return new PackageVersion(version);
 }
 
 function outputVersionTeamcity(version)
 {
-  const packageJson = getPackageJson();
-  const { name: packageName, version: packageVersion } = packageJson;
-  console.log(`##teamcity[buildNumber '${formatVersion(version)}']`);
+  const packageName = getPackageJson().name;
+  console.log(`##teamcity[buildNumber '${version.toString()}']`);
   console.log(`##teamcity[setParameter name='package.Name' value='${packageName}']`);
-  console.log(`##teamcity[setParameter name='package.Version' value='${packageVersion}']`);
+  console.log(`##teamcity[setParameter name='package.Version' value='${version.version}']`);
   console.log(`##teamcity[setParameter name='package.Prerelease' value='${version.prerelease}']`);
 }
 
-function outputVersionJson(version)
+function outputVersionJSON(version)
 {
-  console.log(JSON.stringify(version));
+  console.log(version.toJSON());
 }
 
 function outputVersion(version)
@@ -168,13 +164,13 @@ function outputVersion(version)
   switch (true)
   {
     case program.json:
-      outputVersionJson(version);
+      outputVersionJSON(version);
       break;
     case program.teamcity:
       outputVersionTeamcity(version);
       break;
     default:
-      console.log(version)
+      console.log(version.toString())
   }
 }
 
@@ -184,7 +180,7 @@ function writeVersion(version)
     try
     {
       const prevPackage = getPackageJson();
-      prevPackage.version = formatVersion(version);
+      prevPackage.version = version.toString();
       const nextPackage = JSON.stringify(prevPackage, null, 2);
       fs.writeFile(packageJsonPath, nextPackage, 'utf8', resolve);
     } catch(e) { reject(e); }
@@ -207,15 +203,18 @@ function getPrefixByBranch(repo, currentVersion)
           outputVersionTeamcity(currentVersion);
           break;
         case (normalizeName === 'develop'):
-          outputVersionTeamcity(currentVersion + '-alpha.q');
+          currentVersion.prerelease = 'alpha.1';
+          outputVersionTeamcity(currentVersion);
           break;
         case ((/^release\/.*$/).test(normalizeName)):
           branchVersion = getVersionByBranchName(normalizeName);
-          outputVersionTeamcity(branchVersion + '-rc.1');
+          branchVersion.prerelease = 'alpha.1';
+          outputVersionTeamcity(branchVersion);
           break;
         case ((/^hotfix\/.*$/).test(normalizeName)):
           branchVersion = getVersionByBranchName(normalizeName);
-          outputVersionTeamcity(branchVersion + '-beta.1');
+          branchVersion.prerelease = 'beta.1';
+          outputVersionTeamcity(branchVersion);
           break;
         case ((/^feature\/.*$/).test(normalizeName)):
           getFeatureCommit(repo, ref).then(tagHash =>
@@ -223,16 +222,13 @@ function getPrefixByBranch(repo, currentVersion)
             const shortSha = tagHash.slice(0, 7);
             getCommitsCount(repo, ref, tagHash).then((count) =>
             {
-              const version = {
-                version: currentVersion,
-                prerelease: `feature-${shortSha}.${count}`
-              };
+              currentVersion.prerelease = `feature-${shortSha}.${count}`;
 
-              outputVersion(version);
+              outputVersion(currentVersion);
 
               if (program.write)
               {
-                writeVersion(version);
+                writeVersion(currentVersion);
               }
             })
             .catch(e => console.log(e));
@@ -254,7 +250,7 @@ program
   git.Repository.open(workDir)
     .then(function(repo)
     {
-      const currentVersion = getPackageVersion();
+      const currentVersion = new PackageVersion(getPackageVersion());
       getPrefixByBranch(repo, currentVersion)
         .catch((error) => { console.log(error) });
     })
