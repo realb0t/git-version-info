@@ -49,14 +49,14 @@ $ git-version-info --help
 
 Output:
 ```
-Usage: git-version-info [options]
+Usage: git-version-info [options] <cwd>
 
 
 Options:
 
-  -V, --version   output the version number for git-version-info
+  -v, --version   output the version number
   -j, --json      output as JSON
   -t, --teamcity  output for TeamCity as service message
   -w, --write     write version into package.json
-  -h, --help      output usage information
+  -h, --help      output usage information```
 ```

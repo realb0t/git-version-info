@@ -6,17 +6,24 @@ const program = require('commander');
 const Output = require('./lib/output');
 const GitVersionInfo = require('./lib/git-version-info');
 
-const workDir = process.cwd();
+const defaultWorkDirectory = process.cwd();
 const version = require(path.join(__dirname, '/package.json')).version;
+let currentWorkDirectory = defaultWorkDirectory;
 
 program
-  .version(version)
+  .version(version, '-v, --version')
+  .arguments('<cwd>')
   .option('-j, --json', 'output as JSON')
   .option('-t, --teamcity', 'output for TeamCity as service message')
   .option('-w, --write', 'write version into package.json')
+  .action(cwd => {
+    currentWorkDirectory = cwd || defaultWorkDirectory;
+  })
   .parse(process.argv);
 
-  const gitVersionInfo = new GitVersionInfo(workDir);
+  currentWorkDirectory = path.resolve(currentWorkDirectory);
+
+  const gitVersionInfo = new GitVersionInfo(currentWorkDirectory);
   gitVersionInfo.getVersionInfo().then(({ version, package }) =>
   {
     const { json, teamcity, write } = program;
