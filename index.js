@@ -49,7 +49,7 @@ program
       git.Repository.open(workDir)
         .then(function(repo)
         {
-          const currentVersion = new VersionInfo(packageInfo.getVersion());
+          const currentVersion = new VersionInfo(packageInfo.getVersionString());
           produceVersionInfo(repo, currentVersion, packageInfo)
             .catch((error) => { console.log(error) });
         })
