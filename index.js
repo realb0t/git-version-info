@@ -12,13 +12,11 @@ let currentWorkDirectory = defaultWorkDirectory;
 
 program
   .version(version, '-v, --version')
-  .arguments('<cwd>')
+  .arguments('[cwd]')
   .option('-j, --json', 'output as JSON')
   .option('-t, --teamcity', 'output for TeamCity as service message')
   .option('-w, --write', 'write version into package.json')
-  .action(cwd => {
-    currentWorkDirectory = cwd || defaultWorkDirectory;
-  })
+  .action(cwd => { currentWorkDirectory = cwd; })
   .parse(process.argv);
 
   currentWorkDirectory = path.resolve(currentWorkDirectory);
