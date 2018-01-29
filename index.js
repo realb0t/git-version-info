@@ -23,7 +23,7 @@ program
   .option('-w, --write', 'write version into package.json')
   .parse(process.argv);
 
-  gitVersionInfo.getEnvironmentInfo().then(({ version, package }) =>
+  gitVersionInfo.getVersionInfo().then(({ version, package }) =>
   {
     const outputInfo = new OutputInfo(program);
     outputInfo.print(version, package);
