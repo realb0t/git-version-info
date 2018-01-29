@@ -10,30 +10,10 @@ const OutputInfo = require('./lib/output');
 const PackageInfo = require('./lib/package');
 const branchInfoFactory = require('./lib/branch-factory');
 
+const GitVersionInfo = require('./lib/git-version-info');
+
 const workDir = process.cwd();
-
-function processVersionInfo(program, packageVersion, packageInfo)
-{
-  const outputInfo = new OutputInfo(program);
-  outputInfo.print(packageVersion, packageInfo);
-
-  if (program.write)
-  {
-    packageInfo.writeVersion(packageVersion);
-  }
-}
-
-function produceVersionInfo(repo, packageVersion, packageInfo)
-{
-  return branchInfoFactory(repo).then(branchInfo =>
-  {
-    branchInfo.definePrerelease(packageVersion).then(prereleaseVersion =>
-    {
-      processVersionInfo(program, prereleaseVersion, packageInfo);
-    });
-  });
-}
-
+const gitVersionInfo = new GitVersionInfo(workDir);
 const version = require(path.join(__dirname, '/package.json')).version;
 
 program
@@ -43,16 +23,13 @@ program
   .option('-w, --write', 'write version into package.json')
   .parse(process.argv);
 
-  PackageInfo.produce(workDir)
-    .then((packageInfo) =>
-    {
-      git.Repository.open(workDir)
-        .then(function(repo)
-        {
-          const currentVersion = new VersionInfo(packageInfo.getVersionString());
-          produceVersionInfo(repo, currentVersion, packageInfo)
-            .catch((error) => { console.log(error) });
-        })
+  gitVersionInfo.getEnvironmentInfo().then(({ version, package }) =>
+  {
+    const outputInfo = new OutputInfo(program);
+    outputInfo.print(version, package);
 
-    })
-    .catch(error => console.log('Error', error));
+    if (program.write)
+    {
+      package.writeVersion(version);
+    }
+  }).catch(console.log);
