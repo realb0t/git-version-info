@@ -1,6 +1,9 @@
 # git-version-info
 
-Calculate [GitVersion](https://gitversion.readthedocs.io/en/latest/) from repository for CI server.
+This library calculate prerelease package version from the Git repository ([GitVersion](https://gitversion.readthedocs.io/en/latest/)).
+
+In order to CI server can publish the package as _unstable version_ package.
+For calculations to be performed correctly, it is necessary to observe **GitFlow**.
 
 ### Install
 
