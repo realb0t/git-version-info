@@ -7,7 +7,7 @@ const fs = require('fs');
 
 const VersionInfo = require('./lib/version');
 const OutputInfo = require('./lib/output');
-const PackageInfo = require('./lib/package');
+const PackageInfo = require('./lib/package-info');
 const branchInfoFactory = require('./lib/branch-factory');
 
 const GitVersionInfo = require('./lib/git-version-info');
@@ -30,6 +30,6 @@ program
 
     if (program.write)
     {
-      package.writeVersion(version);
+      package.fixVersion(version);
     }
   }).catch(console.log);
