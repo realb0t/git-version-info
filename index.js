@@ -5,10 +5,10 @@ const program = require('commander');
 const git = require('nodegit');
 const fs = require('fs');
 
-const VersionInfo = require('./lib/version-info');
-const OutputInfo = require('./lib/output-info');
-const PackageInfo = require('./lib/package-info');
-const branchInfoFactory = require('./lib/branch-info-factory');
+const VersionInfo = require('./lib/version');
+const OutputInfo = require('./lib/output');
+const PackageInfo = require('./lib/package');
+const branchInfoFactory = require('./lib/branch-factory');
 
 const workDir = process.cwd();
 
