@@ -5,7 +5,7 @@ const program = require('commander');
 const git = require('nodegit');
 const fs = require('fs');
 
-const PackageVersion = require('./lib/package-version');
+const VersionInfo = require('./lib/version-info');
 const OutputInfo = require('./lib/output-info');
 const PackageInfo = require('./lib/package-info');
 const branchInfoFactory = require('./lib/branch-info-factory');
@@ -49,7 +49,7 @@ program
       git.Repository.open(workDir)
         .then(function(repo)
         {
-          const currentVersion = new PackageVersion(packageInfo.getVersion());
+          const currentVersion = new VersionInfo(packageInfo.getVersion());
           produceVersionInfo(repo, currentVersion, packageInfo)
             .catch((error) => { console.log(error) });
         })
