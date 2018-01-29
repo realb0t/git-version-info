@@ -18,6 +18,8 @@ This definition available for following branches:
 
 `{commits}` - quantity commits from branch start.
 
+## Example
+
 The final semantic version of the package looks like:
 
 ```
@@ -31,7 +33,7 @@ it's prerelease version looks like:
 1.2.3-feature-3kn3erb.13+42
 ```
 
-### Install
+## Install
 
 ```
 $ npm i git-version-info -g
