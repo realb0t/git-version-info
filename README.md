@@ -9,9 +9,9 @@ This calculation available for following branches:
 
 * **master** - package version remains as is
 * **develop** - to package version will be added prerelease part ```-alpha.{commits}```
+* **hotfix/*** - to package version will be added prerelease part ```-beta.{commits}```
 * **feature/*** - to package version will be added prerelease part ```-feature-{hash}.{commits}```
-* **release/*** - to package version will be added prerelease part ```-rc-{hash}.{commits}```
-* **hotfix/*** - to package version will be added prerelease part ```-beta-{hash}.{commits}```
+* **release/*** - to package version will be added prerelease part ```-rc.{commits}```
 
 
 ### Install
