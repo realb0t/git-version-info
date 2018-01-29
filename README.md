@@ -15,6 +15,7 @@ This definition available for following branches:
 * **release/*** - to package version will be added prerelease part `rc.{commits}`
 
 `{hash}` - it's first feature branch commit (generic commit from develop and feature branch)
+
 `{commits}` - quantity commits from branch start.
 
 The final semantic version of the package looks like:
@@ -23,7 +24,8 @@ The final semantic version of the package looks like:
 <major>.<minor>.<patch>-<prerelease>+<build-number>
 ```
 
-For example:
+For example for branch `feature/feature-long-name` and package main version `1.2.3`,
+it's prerelease version looks like:
 
 ```
 1.2.3-feature-3kn3erb.13+42
