@@ -6,7 +6,7 @@ const git = require('nodegit');
 const fs = require('fs');
 
 const VersionInfo = require('./lib/version');
-const OutputInfo = require('./lib/output');
+const Output = require('./lib/output');
 const PackageInfo = require('./lib/package-info');
 const branchInfoFactory = require('./lib/branch-factory');
 
@@ -25,10 +25,10 @@ program
 
   gitVersionInfo.getVersionInfo().then(({ version, package }) =>
   {
-    const outputInfo = new OutputInfo(program);
-    outputInfo.print(version, package);
+    const { json, teamcity, write } = program;
+    new Output({ json, teamcity }).print(version, package);
 
-    if (program.write)
+    if (write)
     {
       package.fixVersion(version);
     }
