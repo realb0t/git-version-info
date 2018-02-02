@@ -3,7 +3,7 @@
 This library is intended for define semantic version of package by the git environment.
 It's inspired by [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/), [SemVer 2.0.0](https://semver.org/), [GitVersion](https://gitversion.readthedocs.io/en/latest/).
 
-Base agreement:
+Base agreements:
 
 * The stable versions of the package are announced by the developer in **master** branches
 * Unstable versions of the package **could be** computed by the git environment
@@ -18,7 +18,7 @@ This definition available for following branches:
 * **master** - package version remains as is `X.Y.Z`
 * **develop** - to package version is `X.(Y+1).0-alpha.{commits}`
 * **feature/*** - to package version is `X.(Y+1).0-feature-{hash}.{commits}`
-* **release/*** - to package version is `X.(Y+1).0-rc.{commits}`
+* **release/vX'.Y'.Z' - to package version is `X'.Y'.Z'-rc.{commits}`
 * **hotfix/*** - to package version is `X.Y.(Z+1)-beta.{commits}`
 
 `X` - current major version declarate in package.json
