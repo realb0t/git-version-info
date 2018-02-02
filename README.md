@@ -5,8 +5,8 @@ It's inspired by [GitFlow](http://nvie.com/posts/a-successful-git-branching-mode
 
 Base agreements:
 
-* The stable versions of the package are announced by the developer in **master** branches
-* Unstable versions of the package **could be** computed by the git environment
+* The stable versions of the package **should be** are announced by the developer in **master** branches
+* Unstable versions of the package **could be** auto computed by the git environment on CI server
 * Development **should be** carried out within the framework of the [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/),
 and package versions **should be** based on [SemVer 2.0.0](https://semver.org/).
 
