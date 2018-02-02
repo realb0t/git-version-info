@@ -18,7 +18,7 @@ This definition available for following branches:
 * **master** - package version remains as is `X.Y.Z`
 * **develop** - to package version is `X.(Y+1).0-alpha.{commits}`
 * **feature/*** - to package version is `X.(Y+1).0-feature-{hash}.{commits}`
-* **release/vX'.Y'.Z' - to package version is `X'.Y'.Z'-rc.{commits}`
+* **release/vX'.Y'.Z'** - to package version is `X'.Y'.Z'-rc.{commits}`
 * **hotfix/*** - to package version is `X.Y.(Z+1)-beta.{commits}`
 
 `X` - current major version declarate in package.json
