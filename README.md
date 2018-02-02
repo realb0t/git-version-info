@@ -8,11 +8,11 @@ For definition to be performed correctly, it is necessary to observe **GitFlow**
 
 This definition available for following branches:
 
-* **master** - package version remains as is
-* **develop** - to package version will be added prerelease part `alpha.{commits}`
-* **hotfix/*** - to package version will be added prerelease part `beta.{commits}`
-* **feature/*** - to package version will be added prerelease part `feature-{hash}.{commits}`
-* **release/*** - to package version will be added prerelease part `rc.{commits}`
+* **master** - package version remains as is `X.Y.Z`
+* **develop** - to package version is `X.(Y+1).0-alpha.{commits}`
+* **feature/*** - to package version is `X.(Y+1).0-feature-{hash}.{commits}`
+* **release/*** - to package version is `X.(Y+1).0-rc.{commits}`
+* **hotfix/*** - to package version is `X.Y.(Z+1)-beta.{commits}`
 
 `{hash}` - it's first feature branch commit (generic commit from develop and feature branch)
 
