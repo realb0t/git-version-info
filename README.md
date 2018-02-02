@@ -1,4 +1,4 @@
-# git-version-info  [![npm](https://img.shields.io/npm/v/redux-state-machine.svg?style=flat-square)](https://www.npmjs.com/package/git-version-info) [![David](https://img.shields.io/david/realb0t/redux-state-machine.svg?style=flat-square)](https://www.npmjs.com/package/git-version-info)
+# git-version-info  [![npm](https://img.shields.io/npm/v/git-version-info.svg?style=flat-square)](https://www.npmjs.com/package/git-version-info) [![David](https://img.shields.io/david/realb0t/git-version-info.svg?style=flat-square)](https://www.npmjs.com/package/git-version-info)
 
 This library is intended for define semantic version of package by the git environment.
 It's inspired by [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/), [SemVer 2.0.0](https://semver.org/), [GitVersion](https://gitversion.readthedocs.io/en/latest/).
