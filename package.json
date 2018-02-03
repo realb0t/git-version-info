@@ -19,6 +19,8 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^2.13.0",
+    "conf": "^1.4.0",
+    "lodash": "^4.17.4",
     "nodegit": "^0.20.3"
   }
 }
