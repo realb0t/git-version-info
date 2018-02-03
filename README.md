@@ -31,6 +31,22 @@ This definition available for following branches:
 
 `{commits}` - quantity commits from branch start.
 
+Prerelease path could be override with config file `git-version-info.json`.
+This config file should be place into **current work directory**.
+
+Config file content (default value):
+
+```
+{
+  "prerelease": {
+    "develop": "alpha.${developBranchCommitsCount}",
+    "feature": "feature-${firstFeatureCommitSha}.${featureBranchCommitsCount}",
+    "hotfix": "beta.${hotfixBranchCommitsCount}",
+    "release": "rc.${releaseBranchCommitsCount}"
+  }
+}
+```
+
 ## Example
 
 The final semantic version of the package looks like:
