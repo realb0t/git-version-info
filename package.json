@@ -3,11 +3,8 @@
   "version": "0.4.0",
   "description": "GitVersion Info tool",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "bin": {
-    "git-version-info": "./index.js"
+    "git-version-info": "./node_modules/git-semver-info/index.js"
   },
   "keywords": [
     "git",
@@ -18,9 +15,6 @@
   "author": "Kazantsev Nickolay",
   "license": "MIT",
   "dependencies": {
-    "commander": "^2.13.0",
-    "conf": "^1.4.0",
-    "lodash": "^4.17.4",
-    "nodegit": "^0.20.3"
+    "git-semver-info": "^0.5.1"
   }
 }
